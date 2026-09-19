@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuestro árbol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+  /* ============================================================
+     ✏️  EDITA AQUÍ TUS DATOS
+     El título, la carta del sobre, la fecha y la lista de fotos
+     están todas juntas más abajo, dentro de <script>.
+     ============================================================ */
+
+  :root{
+    --bg-top: #0d1023;
+    --bg-bottom: #1c2340;
+    --gold: #e8bd7e;
+    --gold-soft: #f2d9a8;
+    --blush: #f0a6a0;
+    --sage: #5c8b6d;
+    --sage-dark: #3d5f48;
+    --blossom-1: #f7c6d3;
+    --blossom-2: #f2a9bd;
+    --blossom-3: #e98aa4;
+    --blossom-light: #fde3ea;
+    --bark: #6b4a3a;
+    --bark-dark: #4a3226;
+    --bark-light: #8a6350;
+    --cream: #f6efe4;
+    --cream-dim: #cfc6b8;
+    --ink: #0d1023;
+    --paper: #efe4cf;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html,body{
+    margin:0; padding:0; min-height:100%;
+    background: radial-gradient(ellipse at 50% 0%, var(--bg-bottom) 0%, var(--bg-top) 70%);
+    color: var(--cream);
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x:hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+
+  /* ---------------------------------------------------------- */
+  /* fondo: estrellas, luciérnagas, pétalos                     */
+  /* ---------------------------------------------------------- */
+  #sky{ position:fixed; inset:0; z-index:0; pointer-events:none; }
+  .star{
+    position:absolute; width:2px; height:2px; border-radius:50%;
+    background: var(--cream); opacity:.5;
+    animation: twinkle 4s ease-in-out infinite;
+  }
+  @keyframes twinkle{ 0%,100%{opacity:.15} 50%{opacity:.85} }
+
+  .firefly{
+    position:absolute; width:5px; height:5px; border-radius:50%;
+    background: var(--gold-soft);
+    box-shadow: 0 0 8px 3px rgba(232,189,126,.7);
+    animation: drift 14s ease-in-out infinite;
+    opacity:0;
+  }
+  @keyframes drift{
+    0%   { transform: translate(0,0); opacity:0; }
+    10%  { opacity:.9; }
+    50%  { transform: translate(var(--dx), var(--dy)); }
+    90%  { opacity:.7; }
+    100% { transform: translate(calc(var(--dx) * 1.6), calc(var(--dy) * -0.6)); opacity:0; }
+  }
+
+  .petal{
+    position:absolute; top:-5%;
+    width:11px; height:9px;
+    background: linear-gradient(135deg, var(--blossom-light), var(--blossom-2));
+    border-radius: 60% 5% 60% 5%;
+    opacity:0;
+    animation: fall linear infinite;
+  }
+  @keyframes fall{
+    0%   { transform: translate(0,0) rotate(0deg); opacity:0; }
+    8%   { opacity:.85; }
+    92%  { opacity:.6; }
+    100% { transform: translate(var(--sway), 108vh) rotate(300deg); opacity:0; }
+  }
+
+  /* ---------------------------------------------------------- */
+  /* sobre introductorio                                         */
+  /* ---------------------------------------------------------- */
+  #gate{
+    position:fixed; inset:0; z-index:20;
+    display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(ellipse at 50% 40%, var(--bg-bottom) 0%, var(--bg-top) 75%);
+    transition: opacity .9s ease, visibility .9s ease;
+  }
+  #gate.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+
+  #gate .hint{
+    position:absolute; bottom:8vh; left:0; right:0;
+    text-align:center;
+    font-family:'Cormorant Garamond', serif; font-style:italic;
+    color: var(--cream-dim); font-size:1rem;
+    opacity:.8;
+    animation: pulseHint 2.4s ease-in-out infinite;
+  }
+  @keyframes pulseHint{ 0%,100%{opacity:.5} 50%{opacity:.95} }
+
+  .envelope{
+    position:relative;
+    width: min(320px, 78vw);
+    aspect-ratio: 3/2;
+    cursor:pointer;
+  }
+  .envelope .body{
+    position:absolute; inset:0;
+    background: linear-gradient(160deg, #cbb185, #a9835a);
+    border-radius: 6px;
+    box-shadow: 0 25px 60px rgba(0,0,0,.45);
+  }
+  .envelope .letter{
+    position:absolute;
+    left:6%; right:6%; top:-4%;
+    height:92%;
+    background: var(--paper);
+    border-radius: 3px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.25);
+    transition: transform .9s cubic-bezier(.6,.05,.3,1), opacity .6s ease .3s;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center; padding: 10%;
+  }
+  .envelope .letter span{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic; color:#5c4a2f; font-size: .95rem; line-height:1.5;
+  }
+  .envelope .flap{
+    position:absolute; inset:0 0 auto 0; height:52%;
+    background: linear-gradient(160deg, #d8bf92, #b6905f);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top center;
+    transition: transform .7s cubic-bezier(.6,.05,.3,1);
+    z-index:3;
+    box-shadow: 0 6px 14px rgba(0,0,0,.2);
+  }
+  .envelope .seal{
+    position:absolute; left:50%; top:38%;
+    width:46px; height:46px; border-radius:50%;
+    transform: translate(-50%,-50%);
+    background: radial-gradient(circle at 35% 30%, var(--blush), #b5453f 70%);
+    display:flex; align-items:center; justify-content:center;
+    color: var(--paper); font-size:1.2rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,.35);
+    z-index:4;
+    transition: opacity .4s ease, transform .4s ease;
+  }
+
+  .envelope.open .flap{ transform: rotateX(180deg); }
+  .envelope.open .seal{ opacity:0; transform: translate(-50%,-50%) scale(.4); }
+  .envelope.open .letter{ transform: translateY(-78%); }
+
+  #gate.leaving .envelope{ animation: sinkAway .8s ease forwards .5s; }
+  @keyframes sinkAway{ to{ transform: translateY(-30px) scale(.94); opacity:0; } }
+
+  /* ---------------------------------------------------------- */
+  /* contenido principal                                        */
+  /* ---------------------------------------------------------- */
+  main{
+    position:relative; z-index:1;
+    max-width: 940px; margin: 0 auto;
+    padding: 6vh 20px 10vh;
+    text-align:center;
+  }
+
+  header h1{
+    font-family: 'Cormorant Garamond', serif;
+    font-weight:600; font-style:italic;
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    margin: 0 0 6px;
+    letter-spacing:.01em;
+    color: var(--cream);
+    opacity:0;
+  }
+  header p.sub{
+    font-family:'Cormorant Garamond', serif;
+    font-size: clamp(1rem, 2.4vw, 1.25rem);
+    color: var(--cream-dim);
+    margin: 0 0 4vh;
+    opacity:0;
+  }
+  #dias{
+    font-family:'Inter'; font-size:.85rem; letter-spacing:.03em;
+    color: var(--gold-soft); opacity:0;
+  }
+
+  body:not(.opened) header h1,
+  body:not(.opened) header p.sub,
+  body:not(.opened) #dias,
+  body:not(.opened) .branch,
+  body:not(.opened) .leafdot,
+  body:not(.opened) .memory{
+    animation-play-state: paused !important;
+  }
+
+  body.opened header h1{ animation: fadeIn 1.4s ease forwards .1s; }
+  body.opened header p.sub{ animation: fadeIn 1.4s ease forwards .5s; }
+  body.opened #dias{ animation: fadeIn 1.4s ease forwards .9s; }
+  @keyframes fadeIn{ to{ opacity:1 } }
+
+  /* ---- árbol ---- */
+  #tree-glow{
+    position:absolute; left:50%; top:36%;
+    width:78%; aspect-ratio:1;
+    transform:translate(-50%,-50%);
+    background: radial-gradient(circle, rgba(242,169,189,.30) 0%, rgba(242,169,189,0) 70%);
+    pointer-events:none; z-index:0;
+  }
+  #tree-wrap{
+    position:relative;
+    width:100%;
+    max-width: 800px;
+    margin: 2vh auto 0;
+  }
+  svg#tree{ width:100%; height:auto; display:block; overflow:visible; position:relative; z-index:1; }
+
+  .branch{
+    fill:none;
+    stroke: var(--bark);
+    stroke-width:6;
+    stroke-linecap:round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: grow 2.6s ease-out forwards;
+  }
+  .branch.trunk{ stroke-width:15; stroke: var(--bark-dark); }
+  .branch.med{ stroke-width:4.5; }
+  .branch.thin{ stroke-width:3; }
+  .branch.twig{ stroke-width:1.6; stroke: var(--bark-light); }
+  .bark-vein{
+    fill:none; stroke: var(--bark-dark); stroke-width:1.4; stroke-linecap:round;
+    opacity:0; stroke-dasharray:1; stroke-dashoffset:1;
+    animation: grow 2.2s ease-out forwards, veinFade .6s ease forwards;
+  }
+  @keyframes veinFade{ to{ opacity:.45; } }
+  @keyframes grow{ to{ stroke-dashoffset:0; } }
+
+  /* nubes borrosas de flores, dan volumen detrás de los puntos nítidos */
+  .canopy-blob{
+    opacity:0;
+    animation: blobIn 1.2s ease forwards;
+  }
+  @keyframes blobIn{ to{ opacity:.9; } }
+
+  .leaf-group{
+    animation: sway 6s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+  .leafdot{
+    opacity:0;
+    animation: leafpop .8s ease forwards;
+  }
+  .leafdot.hl{ fill: var(--blossom-light); }
+  .leafdot.mid{ fill: var(--blossom-1); }
+  .leafdot.deep{ fill: var(--blossom-2); }
+  .leafdot.core{ fill: var(--blossom-3); }
+  @keyframes leafpop{ to{ opacity:.95; } }
+  @keyframes sway{
+    0%,100%{ transform: rotate(-1.4deg); }
+    50%{ transform: rotate(1.4deg); }
+  }
+
+  .ground-petal{
+    position:absolute; bottom:2%;
+    width:9px; height:7px;
+    background: linear-gradient(135deg, var(--blossom-light), var(--blossom-2));
+    border-radius: 60% 5% 60% 5%;
+    opacity:.75;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* fotos-ornamento */
+  .memory{
+    position:absolute;
+    width: 58px; height:58px;
+    transform: translate(-50%,-50%) scale(0);
+    opacity:0;
+    animation: pop .7s cubic-bezier(.34,1.56,.64,1) forwards;
+    cursor:pointer;
+    z-index:2;
+  }
+  @keyframes pop{ to{ transform: translate(-50%,-50%) scale(1); opacity:1; } }
+
+  .memory .ring{
+    width:100%; height:100%; border-radius:50%;
+    padding:3px;
+    background: linear-gradient(145deg, var(--gold), var(--blush));
+    box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 6px 18px rgba(0,0,0,.35);
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .memory:hover .ring{
+    transform: scale(1.14);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.2), 0 0 22px 4px rgba(232,189,126,.55);
+  }
+  .memory img{
+    width:100%; height:100%; border-radius:50%;
+    object-fit:cover; display:block;
+    background: linear-gradient(145deg,#3d5f48,#1c2340);
+  }
+  .memory .fallback{
+    width:100%; height:100%; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.2rem; color: var(--gold-soft);
+    background: linear-gradient(145deg,#3d5f48,#1c2340);
+  }
+
+  /* ---- capullo cerrado (la última foto, se abre a mano) ---- */
+  .memory.locked-memory .ring{
+    background: linear-gradient(145deg, var(--bark-light), var(--bark));
+    display:flex; align-items:center; justify-content:center;
+    animation: budBreathe 3.4s ease-in-out infinite;
+  }
+  .memory.locked-memory .ring .bud{
+    font-size:1.3rem;
+    filter: drop-shadow(0 0 4px rgba(0,0,0,.3));
+  }
+  @keyframes budBreathe{
+    0%,100%{ transform: scale(1); }
+    50%{ transform: scale(1.06); }
+  }
+  .memory.locked-memory.shake .ring{ animation: shake .5s ease; }
+  @keyframes shake{
+    0%,100%{ transform: translateX(0); }
+    20%{ transform: translateX(-4px) rotate(-3deg); }
+    40%{ transform: translateX(4px) rotate(3deg); }
+    60%{ transform: translateX(-3px) rotate(-2deg); }
+    80%{ transform: translateX(3px) rotate(2deg); }
+  }
+
+  .arrow-hint{
+    position:absolute;
+    display:flex; align-items:center; gap:6px;
+    transform: translate(-50%,-50%);
+    opacity:0;
+    animation: hintFadeIn .8s ease forwards, hintFloat 2.6s ease-in-out infinite;
+    z-index:3;
+    pointer-events:none;
+  }
+  @keyframes hintFadeIn{ to{ opacity:1; } }
+  @keyframes hintFloat{
+    0%,100%{ margin-top:0; }
+    50%{ margin-top:-5px; }
+  }
+  .arrow-hint svg{ width:34px; height:28px; overflow:visible; flex-shrink:0; }
+  .arrow-hint svg path{
+    fill:none; stroke: var(--gold-soft); stroke-width:2.4; stroke-linecap:round;
+  }
+  .arrow-hint svg polygon{ fill: var(--gold-soft); }
+  .arrow-hint .label{
+    font-family:'Cormorant Garamond', serif; font-style:italic;
+    font-size:.85rem; color: var(--gold-soft);
+    background: rgba(13,16,35,.72);
+    border: 1px solid rgba(242,217,168,.35);
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space:nowrap;
+  }
+  .arrow-hint.hidden{
+    opacity:0 !important;
+    animation: none;
+    transition: opacity .6s ease;
+  }
+
+  @media (max-width: 560px){
+    .arrow-hint .label{ font-size:.72rem; padding:3px 8px; }
+    .arrow-hint svg{ width:26px; height:22px; }
+  }
+
+  footer{
+    margin-top: 8vh;
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    color: var(--cream-dim);
+    min-height: 2.4em;
+    border-top: 1px solid rgba(246,239,228,.12);
+    padding-top: 4vh;
+  }
+  #typed::after{
+    content:'|'; margin-left:2px; color: var(--gold-soft);
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  /* modal */
+  #modal{
+    position:fixed; inset:0; z-index:10;
+    background: rgba(10,12,25,.9);
+    display:flex; align-items:center; justify-content:center;
+    padding: 24px;
+    opacity:0; pointer-events:none;
+    transition: opacity .3s ease;
+  }
+  #modal.open{ opacity:1; pointer-events:auto; }
+  #modal figure{
+    margin:0; max-width: 560px; width:100%;
+    text-align:center;
+    transform: translateY(12px);
+    transition: transform .3s ease;
+  }
+  #modal.open figure{ transform: translateY(0); }
+  #modal img{
+    width:100%; max-height:60vh; object-fit:cover;
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  }
+  #modal figcaption{
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--cream);
+    margin-top: 18px;
+    line-height:1.5;
+  }
+  #modal .close{
+    position:absolute; top:22px; right:28px;
+    background:none; border:none; color: var(--cream-dim);
+    font-size:1.8rem; cursor:pointer; line-height:1;
+  }
+  #modal .close:hover{ color: var(--gold-soft); }
+
+  /* botón de música */
+  #music-btn{
+    position:fixed; right:20px; bottom:20px; z-index:15;
+    width:46px; height:46px; border-radius:50%;
+    border:1px solid rgba(246,239,228,.25);
+    background: rgba(13,16,35,.6);
+    backdrop-filter: blur(6px);
+    color: var(--gold-soft);
+    font-size:1.1rem;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    transition: transform .2s ease, background .2s ease;
+    opacity:0;
+  }
+  body.opened #music-btn{ opacity:1; transition: opacity .8s ease 1.5s; }
+  #music-btn:hover{ transform: scale(1.08); background: rgba(13,16,35,.85); }
+  #music-btn.playing{ animation: pulseMusic 2.4s ease-in-out infinite; }
+  @keyframes pulseMusic{ 0%,100%{ box-shadow:0 0 0 0 rgba(232,189,126,.35);} 50%{ box-shadow:0 0 0 8px rgba(232,189,126,0);} }
+
+  @media (max-width: 520px){
+    .memory{ width:48px; height:48px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="sky"></div>
+
+<!-- ================= SOBRE INTRODUCTORIO ================= -->
+<div id="gate">
+  <div class="envelope" id="envelope">
+    <div class="letter"><span id="carta-texto">Toca para abrir</span></div>
+    <div class="flap"></div>
+    <div class="seal">&#10084;</div>
+    <div class="body"></div>
+  </div>
+  <p class="hint">Toca el sobre</p>
+</div>
+
+<main>
+  <header>
+    <h1 id="titulo">Nuestro árbol de momentos</h1>
+    <p class="sub" id="subtitulo">Cada rama guarda algo tuyo</p>
+    <p id="dias"></p>
+  </header>
+
+  <div id="tree-wrap">
+    <div id="tree-glow"></div>
+    <svg id="tree" viewBox="0 0 700 640" preserveAspectRatio="xMidYMax meet"></svg>
+  </div>
+
+  <footer>
+    <span id="typed"></span>
+  </footer>
+</main>
+
+<div id="modal">
+  <button class="close" aria-label="Cerrar">&times;</button>
+  <figure>
+    <img id="modal-img" src="" alt="">
+    <figcaption id="modal-caption"></figcaption>
+  </figure>
+</div>
+
+<button id="music-btn" aria-label="Música" title="Música">&#9834;</button>
+<audio id="bg-music" loop preload="none"></audio>
+
+<script>
+/* ============================================================
+   ✏️  EDITA AQUÍ: vuestros datos
+   ============================================================ */
+
+// Texto que se ve escrito en la carta dentro del sobre, antes de abrir
+document.getElementById('carta-texto').textContent = "Para ti";
+
+// Título y subtítulo del árbol
+document.getElementById('titulo').textContent = "Nuestro árbol de momentos";
+document.getElementById('subtitulo').textContent = "Cada rama guarda algo nuestro y lo que pienso";
+
+// Frase final, tipo "carta" — aparece escribiéndose sola
+const MENSAJE_FINAL = "Gracias por haberme hecho vivir momentos tan bonitos, gracias por hacer que me enamore de ti cada día más, gracias por ser una mujer tan buena y perfecta, gracias por todo lo que me has ofrecido, mi amor. Todo en ti me encanta: tu mirada fría pero encantadora, tu sonrisa que me ilumina, tus labios que me llaman para que los bese, tu hermoso cabello color rojo que te hace destacar tanto, tu bella piel blanca que me dan ganas de tocar y cuidar. Todo en ti me genera una sensación, cosas que amo y aprecio mucho: tus sentimientos y tu corazón, todo, pero absolutamente todo en ti para mí es perfecto. Te amo mucho, Tani, mi amor, mi cielo, mi corazón, mi eclipse lunar, mis ganas de ser mejor. Lo representas todo para mí. Mi vida, te amo un montón.";
+
+// Fecha de inicio para el contador de días juntos (opcional).
+// Formato "AAAA-MM-DD". Déjalo como null si no lo quieres mostrar.
+const FECHA_INICIO = null; // ej: "2022-05-14"
+
+// Música de fondo (opcional). Pon un mp3 en una carpeta "music" junto
+// a este archivo y escribe aquí su ruta, ej: "music/cancion.mp3".
+// Si lo dejas vacío (""), el botón de música simplemente no aparece.
+const MUSICA = "";
+
+// Vuestras fotos y recuerdos (hasta 11 se acomodan bien en el árbol).
+// "src": ruta a la imagen (ponlas en la carpeta /images).
+// "caption": el texto que aparece al hacer clic en la foto.
+// La ÚLTIMA foto de la lista se queda como un capullo cerrado en el
+// árbol y solo se revela cuando la toques tú misma/o, cuando quieras
+// mostrársela — no se abre sola ni por tiempo.
+const MEMORIES = [
+  { src: "images/1.jpeg", caption: "Estos dias simples donde la pasamos bien." },
+  { src: "images/2.jpeg", caption: "Cada conversacion que tenemos es entretenida y unica." },
+  { src: "images/3.jpeg", caption: "Cada foto tomada es un recuerdo de lo bien que la paso contigo." },
+  { src: "images/4.jpeg", caption: "Aunque solo es a traves de una pantalla, disfruto cada momento a tu lado." },
+  { src: "images/5.jpeg", caption: "Me suelo desvelar contigo porque la noche no me parece suficiente cuando estoy a tu lado." },
+  { src: "images/6.jpeg", caption: "Cada momento contigo e1s unico, diferente y especial." },
+  { src: "images/7.png", caption: "Cada momento contigo me recuerda lo mucho que te amo y cada momento sin ti es un ´te extraño´ que me recureda lo mucho que disfruto tu presencia." },
+  { src: "images/8.png", caption: "Disfruto todo lo que hago contigo sin importar que sea." },
+  { src: "images/9.png", caption: "Deseo siempre estar asi contigo." },
+  { src: "images/10.png", caption: "Deseo poder seguir pasando horas contigo." },
+  { src: "images/11.png", caption: "Pero lo que mas deseo es poder estar a tu lado sin panatallas de por medio, sin una distancia que nos limite, solo tu y yo en la misma habitacion." },
+];
+
+/* ============================================================
+   A partir de aquí es el motor del árbol — no hace falta tocarlo.
+   ============================================================ */
+
+// --- cielo: estrellas, luciérnagas, pétalos ---
+const sky = document.getElementById('sky');
+for(let i=0;i<70;i++){
+  const s = document.createElement('div');
+  s.className='star';
+  s.style.left = Math.random()*100+'%';
+  s.style.top = Math.random()*60+'%';
+  s.style.animationDelay = (Math.random()*4)+'s';
+  sky.appendChild(s);
+}
+for(let i=0;i<16;i++){
+  const f = document.createElement('div');
+  f.className='firefly';
+  f.style.left = (10+Math.random()*80)+'%';
+  f.style.top = (30+Math.random()*60)+'%';
+  f.style.setProperty('--dx', (Math.random()*160-80)+'px');
+  f.style.setProperty('--dy', (Math.random()*-120-20)+'px');
+  f.style.animationDelay = (Math.random()*10)+'s';
+  sky.appendChild(f);
+}
+for(let i=0;i<14;i++){
+  const p = document.createElement('div');
+  p.className='petal';
+  p.style.left = Math.random()*100+'%';
+  p.style.setProperty('--sway', (Math.random()*140-70)+'px');
+  p.style.animationDuration = (9+Math.random()*8)+'s';
+  p.style.animationDelay = (Math.random()*12)+'s';
+  sky.appendChild(p);
+}
+
+// --- contador de días ---
+if (FECHA_INICIO){
+  const inicio = new Date(FECHA_INICIO+'T00:00:00');
+  const dias = Math.floor((Date.now() - inicio.getTime())/86400000);
+  if (!isNaN(dias) && dias >= 0){
+    document.getElementById('dias').textContent = dias + " días juntos, y contando";
+  }
+}
+
+// --- música opcional ---
+const musicBtn = document.getElementById('music-btn');
+const audio = document.getElementById('bg-music');
+if (MUSICA){
+  audio.src = MUSICA;
+  musicBtn.addEventListener('click', ()=>{
+    if (audio.paused){
+      audio.play().catch(()=>{ /* el archivo no existe o el navegador lo bloqueó */ });
+      musicBtn.classList.add('playing');
+    } else {
+      audio.pause();
+      musicBtn.classList.remove('playing');
+    }
+  });
+} else {
+  musicBtn.style.display = 'none';
+}
+
+// --- construir el árbol (SVG) ---
+const svg = document.getElementById('tree');
+const NS = "http://www.w3.org/2000/svg";
+
+function path(d, cls, delay){
+  const p = document.createElementNS(NS,'path');
+  p.setAttribute('d', d);
+  p.setAttribute('class', cls);
+  p.style.animationDelay = delay+'s';
+  svg.appendChild(p);
+  return p;
+}
+
+// filtro de desenfoque para las nubes de flores (definido una vez)
+const defs = document.createElementNS(NS,'defs');
+const blur = document.createElementNS(NS,'filter');
+blur.setAttribute('id','soft-blur');
+blur.setAttribute('x','-60%'); blur.setAttribute('y','-60%');
+blur.setAttribute('width','220%'); blur.setAttribute('height','220%');
+const feBlur = document.createElementNS(NS,'feGaussianBlur');
+feBlur.setAttribute('stdDeviation','9');
+blur.appendChild(feBlur);
+defs.appendChild(blur);
+svg.appendChild(defs);
+
+// tronco, con una leve curva natural y un ensanche en la base
+path("M330,626 C322,600 336,560 332,520 C328,470 344,450 350,410", "branch trunk", 0);
+
+// pequeñas vetas de corteza sobre el tronco, para dar textura
+[
+  "M336,590 C338,570 332,555 336,535",
+  "M344,540 C346,520 340,500 344,480",
+  "M328,470 C332,455 326,440 330,425",
+].forEach((d,i)=> path(d, "bark-vein", 0.3 + i*0.15));
+
+// ramas principales + secundarias + ramitas finas, para un árbol más frondoso
+const branches = [
+  { d:"M350,410 C316,368 250,345 175,300", cls:"branch", delay:0.9 },
+  { d:"M350,410 C386,360 445,335 510,282", cls:"branch", delay:0.9 },
+  { d:"M350,385 C328,325 296,272 244,205", cls:"branch med", delay:1.15 },
+  { d:"M350,385 C372,325 412,272 466,210", cls:"branch med", delay:1.15 },
+  { d:"M350,345 C350,280 350,225 350,150", cls:"branch med", delay:1.4 },
+  { d:"M175,300 C142,278 110,266 78,255",  cls:"branch thin", delay:1.65 },
+  { d:"M510,282 C552,266 588,254 624,246", cls:"branch thin", delay:1.65 },
+  { d:"M244,205 C212,182 188,166 160,142", cls:"branch thin", delay:1.85 },
+  { d:"M466,210 C498,184 524,168 552,144", cls:"branch thin", delay:1.85 },
+  { d:"M350,240 C322,205 300,178 268,140", cls:"branch thin", delay:2.0 },
+  { d:"M350,240 C378,205 402,178 434,140", cls:"branch thin", delay:2.0 },
+  { d:"M175,300 C188,330 195,352 190,378", cls:"branch thin", delay:1.8 },
+  { d:"M510,282 C500,312 496,335 505,360", cls:"branch thin", delay:1.8 },
+  // ramitas finas de remate, para que el borde de la copa no sea recto
+  { d:"M78,255 C60,248 44,246 30,250",   cls:"branch twig", delay:2.1 },
+  { d:"M624,246 C642,240 658,240 672,246", cls:"branch twig", delay:2.1 },
+  { d:"M160,142 C148,128 140,116 134,102", cls:"branch twig", delay:2.2 },
+  { d:"M552,144 C564,130 572,118 578,104", cls:"branch twig", delay:2.2 },
+  { d:"M268,140 C258,120 252,106 248,88",  cls:"branch twig", delay:2.3 },
+  { d:"M434,140 C444,120 450,106 454,88",  cls:"branch twig", delay:2.3 },
+  { d:"M350,150 C346,124 350,108 344,86",  cls:"branch twig", delay:2.3 },
+];
+branches.forEach(b => path(b.d, b.cls, b.delay));
+
+// racimos de flores — cada uno envuelto en un <g> que se balancea solo
+const leafClusters = [
+  [175,300,30],[510,282,30],[244,205,26],[466,210,26],[350,150,28],
+  [78,255,20],[624,246,20],[160,142,18],[552,144,18],
+  [268,140,18],[434,140,18],[350,240,24],[300,255,19],[400,255,19],
+  [190,378,16],[505,360,16]
+];
+const tones = ['hl','mid','mid','deep','core']; // más claros que oscuros = luce más luminoso
+
+leafClusters.forEach(([x,y,spread],i)=>{
+  // nube borrosa de base: da volumen y evita que se vea "de puntitos sueltos"
+  const blob = document.createElementNS(NS,'ellipse');
+  blob.setAttribute('cx', x); blob.setAttribute('cy', y - spread*0.15);
+  blob.setAttribute('rx', spread*1.15); blob.setAttribute('ry', spread*0.85);
+  blob.setAttribute('fill', i % 2 ? 'var(--blossom-1)' : 'var(--blossom-2)');
+  blob.setAttribute('filter', 'url(#soft-blur)');
+  blob.setAttribute('class','canopy-blob');
+  blob.style.animationDelay = (1.9 + i*0.05)+'s';
+  svg.appendChild(blob);
+
+  const g = document.createElementNS(NS,'g');
+  g.setAttribute('class','leaf-group');
+  g.style.animationDelay = (Math.random()*3)+'s';
+  g.style.animationDuration = (5+Math.random()*3)+'s';
+  const count = 7 + Math.round(Math.random()*4);
+  for(let j=0;j<count;j++){
+    const dot = document.createElementNS(NS,'circle');
+    const ox = x + (Math.random()*spread*2-spread);
+    const oy = y + (Math.random()*spread*1.4-spread*1.1);
+    dot.setAttribute('cx',ox); dot.setAttribute('cy',oy);
+    dot.setAttribute('r', 3.5+Math.random()*4.5);
+    const tone = tones[Math.floor(Math.random()*tones.length)];
+    dot.setAttribute('class','leafdot '+tone);
+    dot.style.animationDelay = (2.15 + i*0.04 + j*0.04)+'s';
+    g.appendChild(dot);
+  }
+  svg.appendChild(g);
+});
+
+// unos pétalos ya posados en la base del árbol, como si hubieran caído
+const groundSpots = [38,46,54,60,50,44];
+groundSpots.forEach((leftPct,i)=>{
+  const gp = document.createElement('div');
+  gp.className = 'ground-petal';
+  gp.style.left = leftPct+'%';
+  gp.style.transform = `rotate(${Math.random()*360}deg)`;
+  gp.style.bottom = (1+Math.random()*3)+'%';
+  document.getElementById('tree-wrap').appendChild(gp);
+});
+
+// puntos donde "cuelgan" las fotos, repartidos por todo el follaje
+const photoSpots = [
+  [175,300],[510,282],[244,205],[466,210],[350,150],
+  [78,255],[624,246],[160,142],[552,144],[268,140],[434,140]
+];
+
+const wrap = document.getElementById('tree-wrap');
+const modal = document.getElementById('modal');
+const modalImg = document.getElementById('modal-img');
+const modalCaption = document.getElementById('modal-caption');
+
+function openModal(src, caption){
+  modalImg.src = src;
+  modalImg.alt = caption;
+  modalCaption.textContent = caption;
+  modal.classList.add('open');
+}
+document.querySelector('#modal .close').addEventListener('click', ()=> modal.classList.remove('open'));
+modal.addEventListener('click', (e)=>{ if(e.target === modal) modal.classList.remove('open'); });
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') modal.classList.remove('open'); });
+
+// la última foto realmente usada (aunque tengas menos de 11) es la que
+// se queda como capullo cerrado, hasta que la toquen.
+const totalMemories = Math.min(MEMORIES.length, photoSpots.length);
+
+MEMORIES.slice(0, photoSpots.length).forEach((mem, i)=>{
+  const [x,y] = photoSpots[i];
+  const leftPct = (x/700*100);
+  const topPct  = (y/640*100);
+  const isLast = (i === totalMemories - 1);
+
+  const el = document.createElement('div');
+  el.className = 'memory' + (isLast ? ' locked-memory' : '');
+  el.style.left = leftPct+'%';
+  el.style.top  = topPct+'%';
+  el.style.animationDelay = (2.4 + i*0.3)+'s';
+
+  const ring = document.createElement('div');
+  ring.className = 'ring';
+
+  if (isLast){
+    // esta foto NO se ve desde fuera: se queda como un capullo cerrado
+    // y solo se revela cuando se hace clic sobre ella. No hay temporizador,
+    // ni se abre sola al terminar el mensaje: la abres tú, cuando quieras.
+    ring.innerHTML = '<span class="bud">&#127800;</span>';
+    el.appendChild(ring);
+
+    const openFinal = ()=>{
+      if (!el.classList.contains('unlocked')){
+        // primer clic: revela la foto real y la abre en grande
+        const hint = document.getElementById('final-hint');
+        if (hint) hint.classList.add('hidden');
+
+        ring.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = mem.src;
+        img.alt = mem.caption;
+        img.onerror = function(){ ring.innerHTML = '<div class="fallback">&#10084;</div>'; };
+        ring.appendChild(img);
+
+        el.classList.remove('locked-memory');
+        el.classList.add('unlocked');
+      }
+      openModal(mem.src, mem.caption);
+    };
+    el.addEventListener('click', openFinal);
+    wrap.appendChild(el);
+
+    // flecha + etiqueta señalando el capullo
+    const hint = document.createElement('div');
+    hint.className = 'arrow-hint';
+    hint.id = 'final-hint';
+    hint.style.left = (leftPct + 11) + '%';
+    hint.style.top  = (topPct - 7) + '%';
+    hint.style.animationDelay = (2.4 + i*0.3 + 0.6)+'s';
+    hint.innerHTML =
+      '<svg viewBox="0 0 34 28"><path d="M32,4 C22,2 10,10 6,22"/><polygon points="2,26 3,15 12,21"/></svg>' +
+      '<span class="label">Se abre al final</span>';
+    wrap.appendChild(hint);
+    return;
+  }
+
+  const img = document.createElement('img');
+  img.src = mem.src;
+  img.alt = mem.caption;
+  img.onerror = function(){
+    ring.innerHTML = '<div class="fallback">&#10084;</div>';
+  };
+  ring.appendChild(img);
+  el.appendChild(ring);
+
+  el.addEventListener('click', ()=> openModal(mem.src, mem.caption));
+  wrap.appendChild(el);
+});
+
+// mensaje final escribiéndose solo (se activa al abrir el sobre)
+const typedEl = document.getElementById('typed');
+function typeWriter(){
+  let ci = 0;
+  (function step(){
+    if(ci <= MENSAJE_FINAL.length){
+      typedEl.textContent = MENSAJE_FINAL.slice(0, ci);
+      ci++;
+      setTimeout(step, 32);
+    }
+  })();
+}
+
+// --- lógica del sobre: abrir y pasar al árbol ---
+const gate = document.getElementById('gate');
+const envelope = document.getElementById('envelope');
+let opened = false;
+
+function openGift(){
+  if (opened) return;
+  opened = true;
+  envelope.classList.add('open');
+  document.body.classList.add('opened');
+
+  setTimeout(()=>{
+    gate.classList.add('leaving');
+  }, 900);
+
+  setTimeout(()=>{
+    gate.classList.add('hidden');
+  }, 1700);
+
+  setTimeout(typeWriter, MEMORIES.length*300 + 2600);
+}
+envelope.addEventListener('click', openGift);
+envelope.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') openGift(); });
+envelope.setAttribute('tabindex','0');
+envelope.setAttribute('role','button');
+envelope.setAttribute('aria-label','Abrir el regalo');
+</script>
+
+</body>
+</html>
